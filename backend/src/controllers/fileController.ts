@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import fs from 'fs/promises';
+import fs from 'fs-extra';
 import path from 'path';
 import mongoose from 'mongoose';
 
@@ -104,8 +104,8 @@ async function findFile(reference: string): Promise<string[]> {
 
   try {
     await searchInDirectory(EXPORT_FILES_PATH);
-  } catch (error: any) {
-    console.error('Error searching for file:', error.message);
+  } catch (error) {
+    console.error('Error searching for file:', error);
   }
 
   if (foundPaths.length === 0) {
@@ -122,14 +122,62 @@ export const downloadFile = async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'File path is required' });
   }
 
+  const allowedDir = process.env.EXPORT_FILES_PATH;
+  const fullPath = path.resolve(filePath);
+
+  if (!allowedDir || !fullPath.startsWith(allowedDir)) {
+    return res.status(403).json({ message: 'Access to the file is forbidden' });
+  }
+
   try {
-    if (!(await fs.stat(filePath)).isFile()) {
-      return res.status(404).json({ message: 'File not found' });
+    const stats = await fs.stat(fullPath);
+
+    if (!stats.isFile()) {
+      return res.status(400).json({ message: 'Requested path is not a file' });
     }
 
-    res.download(filePath);
-  } catch (error: any) {
+    const fileStream = fs.createReadStream(fullPath);
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Disposition', `attachment; filename="${path.basename(fullPath)}"`);
+    res.setHeader('Content-Length', stats.size);
+
+    fileStream.pipe(res);
+  } catch (error) {
     console.error('Error downloading file:', error);
-    res.status(500).json({ message: 'Error downloading file', error: error.toString() });
+    res.status(404).json({ message: 'File not found' });
+  }
+};
+
+export const getFileReferences = async (req: Request, res: Response) => {
+  const { patientId } = req.params;
+  const baseDir = process.env.EXPORT_FILES_PATH;
+
+  if (!baseDir) {
+    return res.status(500).json({ message: 'EXPORT_FILES_PATH is not set' });
+  }
+
+  const patientDir = path.join(baseDir, patientId);
+
+  try {
+    const files = await fs.readdir(patientDir, { withFileTypes: true });
+    const fileReferences = await Promise.all(
+      files.map(async (dirent) => {
+        if (dirent.isDirectory()) {
+          const subFiles = await fs.readdir(path.join(patientDir, dirent.name));
+          return subFiles.map((file) => ({
+            filePath: path.join(patientId, dirent.name, file),
+            filename: file,
+            filetype: path.extname(file).slice(1),
+            collection: dirent.name,
+          }));
+        }
+        return [];
+      })
+    );
+
+    res.json(fileReferences.flat());
+  } catch (error) {
+    console.error('Error reading directory:', error);
+    res.status(500).json({ message: 'Error reading directory' });
   }
 };

@@ -1,21 +1,16 @@
-/**
- * This file serves as the entry point for the backend server.
- * It imports necessary dependencies, sets up middleware, connects to MongoDB,
- * defines routes, and starts the server.
- */
-
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
 import readOnlyRoutes from './routes/readOnlyRoutes';
 import patientRoutes from './routes/patientRoutes';
-import './models';
+import fileRoutes from './routes/fileRoutes';
 import connectDB from './config/db';
-import path from 'path';
 
+// Load environment variables
 dotenv.config();
 
 const app = express();
@@ -24,6 +19,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet());
 
 // Rate limiting
@@ -33,16 +29,16 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+// Routes
+app.use('/api', readOnlyRoutes);
+app.use('/api', patientRoutes);
+app.use('/api', fileRoutes);
+
 // Connect to MongoDB and start server
 const startServer = async () => {
   try {
     await connectDB();
     
-    // Routes
-    app.use('/api', readOnlyRoutes);
-    app.use('/api', patientRoutes);
-
-    // Start server
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
@@ -54,14 +50,7 @@ const startServer = async () => {
 
 startServer();
 
-/**
- * Dynamically loads a model based on the provided modelName.
- * It tries different possible file names and returns the first model found.
- * If no model is found, it logs an error and returns null.
- *
- * @param modelName - The name of the model to load.
- * @returns The loaded model or null if no model is found.
- */
+// Model loader function
 export const loadModel = (modelName: string) => {
   const possibleFileNames = [
     `${modelName}Model`,

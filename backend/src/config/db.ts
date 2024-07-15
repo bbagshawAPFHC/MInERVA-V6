@@ -7,7 +7,7 @@ mongoose.set('debug', true);
 
 const connectDB = async () => {
   try {
-    //console.log('MongoDB URI:', process.env.MONGODB_URI);
+    console.log('MongoDB URI:', process.env.MONGODB_URI);
     await mongoose.connect(process.env.MONGODB_URI!, {
       authSource: 'admin',
       retryWrites: true,

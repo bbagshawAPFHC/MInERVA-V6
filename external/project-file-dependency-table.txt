@@ -1,0 +1,39 @@
+# Project File Dependency Table
+
+## Frontend
+
+| File | Description | Depends On | Depended By |
+|------|-------------|------------|-------------|
+| src/main.tsx | Entry point for the React app | App.tsx, index.css | index.html |
+| src/App.tsx | Main component, handles routing | components/*, services/authService.ts, utils/api.ts | main.tsx |
+| src/components/LoginPage.tsx | Handles user login | services/authService.ts | App.tsx |
+| src/components/SearchPatients.tsx | Patient search and results display | utils/api.ts, types/index.ts | App.tsx |
+| src/components/Header.tsx | App header with user info | services/authService.ts | App.tsx |
+| src/components/Sidebar.tsx | Navigation sidebar | - | App.tsx |
+| src/services/authService.ts | Authentication logic | - | LoginPage.tsx, App.tsx |
+| src/utils/api.ts | API calls to backend | - | SearchPatients.tsx, other components |
+| src/types/index.ts | TypeScript type definitions | - | Most .tsx files |
+| vite.config.ts | Vite configuration | - | Build process |
+| tailwind.config.js | Tailwind CSS configuration | - | CSS processing |
+| .env.local | Environment variables | - | App.tsx, api.ts |
+
+## Backend
+
+| File | Description | Depends On | Depended By |
+|------|-------------|------------|-------------|
+| src/index.ts | Entry point for the server | config/db.ts, routes/* | - |
+| src/config/db.ts | Database connection setup | - | index.ts |
+| src/controllers/patientController.ts | Handles patient-related logic | models/*, utils/modelLoader.ts | routes/patientRoutes.ts |
+| src/controllers/fileController.ts | Handles file operations | - | routes/fileRoutes.ts |
+| src/controllers/bulkDownloadController.ts | Manages bulk file downloads | - | routes/fileRoutes.ts |
+| src/controllers/demographicController.ts | Manages demographic data | models/DemographicModel.ts | routes/demographicRoutes.ts |
+| src/controllers/readOnlyController.ts | Handles read-only operations | models/* | routes/readOnlyRoutes.ts |
+| src/models/DemographicModel.ts | Mongoose model for demographics | - | controllers/demographicController.ts |
+| src/models/index.ts | Exports all models | - | controllers/* |
+| src/routes/patientRoutes.ts | Defines patient-related routes | controllers/patientController.ts | index.ts |
+| src/routes/fileRoutes.ts | Defines file-related routes | controllers/fileController.ts, controllers/bulkDownloadController.ts | index.ts |
+| src/routes/demographicRoutes.ts | Defines demographic routes | controllers/demographicController.ts | index.ts |
+| src/routes/readOnlyRoutes.ts | Defines read-only routes | controllers/readOnlyController.ts | index.ts |
+| src/utils/modelLoader.ts | Dynamically loads Mongoose models | - | controllers/* |
+| .env | Environment variables | - | config/db.ts, index.ts |
+
