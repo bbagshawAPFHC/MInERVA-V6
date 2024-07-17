@@ -22,6 +22,7 @@
 - [Structure](#structure)
 - [Logic Flow Diagrams](#logic-flow-diagrams)
 - [Dependency and Interaction Table](#dependency-and-interaction-table)
+- [Dependency Matrix](#dependency-matrix)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [API Docs](#api-documentation)
