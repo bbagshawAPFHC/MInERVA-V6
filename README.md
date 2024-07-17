@@ -48,13 +48,14 @@ MInERVA is a cutting-edge, full-stack application designed to revolutionize the 
 
 | Frontend | Backend | Database | Authentication | Build Tool |
 | --- | --- | --- | --- | --- |
-| ![React](https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original-wordmark.svg) ![TypeScript](https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-plain.svg) ![Tailwind CSS](https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg) | ![Node.js](https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg) ![Express](https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg) | ![MongoDB](https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg) | ![Azure AD](https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-original.svg) | ![Vite](https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vitejs/vitejs-original.svg) ![Mantine](https://avatars.githubusercontent.com/u/79146003?s=200&v=4) |
+| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original-wordmark.svg" height="50" width="50"> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-plain.svg" height="50" width="50"> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg" height="50" width="50"> | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" height="50" width="50"> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg" height="50" width="50"> | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg" height="50" width="50"> | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-original.svg" height="50" width="50"> | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vitejs/vitejs-original.svg" height="50" width="50"> <img src="https://avatars.githubusercontent.com/u/79146003?s=200&v=4" height="50" width="50"> |
+
 
 ## Structure
 
-## Logic Flow Diagrams
+### Logic Flow Diagrams
 
-### Login Flow
+#### Login Flow
 
 ```mermaid
 sequenceDiagram
@@ -72,7 +73,7 @@ sequenceDiagram
     F->>U: Redirect to SearchPatients page
 ```
 
-### File Download Flow
+#### File Download Flow
 
 ```mermaid
 sequenceDiagram
@@ -97,7 +98,7 @@ sequenceDiagram
     F->>U: Initiate file download
 ```
 
-### Patient Search Flow
+#### Patient Search Flow
 
 ```mermaid
 sequenceDiagram
