@@ -25,7 +25,7 @@ const LoginPage: React.FC = () => {
       <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
         <div className="p-6">
           <div className="flex items-center justify-center mb-6">
-            <img src="minerva_1024.png" alt="MINERVA Logo" className="w-32 h-32 ml-8" />
+            <img src="minerva_1024.png" alt="MINERVA Logo" className="w-32 h-32 ml-0" />
           </div>
           <h2 className="text-2xl text-center text-gray-600 mb-2">MInERVA</h2>
           <p className="text-gray-600 text-center mb-4 font-light">
