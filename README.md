@@ -154,6 +154,35 @@ sequenceDiagram
 | backend | src/utils/modelLoader.ts | Dynamically loads Mongoose models | - | controllers/* |
 | backend | .env | Environment variables | - | config/db.ts, index.ts |
 
+## Dependency Matrix
+
+| File | main.tsx | App.tsx | LoginPage.tsx | SearchPatients.tsx | Header.tsx | Sidebar.tsx | authService.ts | api.ts | index.ts (frontend) | db.ts | patientController.ts | fileController.ts | bulkDownloadController.ts | demographicController.ts | readOnlyController.ts | DemographicModel.ts | models/index.ts | patientRoutes.ts | fileRoutes.ts | demographicRoutes.ts | readOnlyRoutes.ts | modelLoader.ts | .env.local | .env |
+|------|----------|---------|---------------|--------------------|------------|-------------|----------------|--------|----------------------|-------|----------------------|-------------------|--------------------------|--------------------------|-----------------------|---------------------|-------------------|------------------|-----------------|---------------------|--------------------|----------------|-------------|------|
+| main.tsx | - | ← | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |
+| App.tsx | → | - | ← | ← | ← | ← | ← | ← | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | ← | - |
+| LoginPage.tsx | - | → | - | - | - | - | ← | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |
+| SearchPatients.tsx | - | → | - | - | - | - | - | ← | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |
+| Header.tsx | - | → | - | - | - | - | ← | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |
+| Sidebar.tsx | - | → | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |
+| authService.ts | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |
+| api.ts | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |
+| index.ts (frontend) | → | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |
+| db.ts | - | - | - | - | - | - | - | - | → | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | ← |
+| patientController.ts | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | → | - | ← | - | - | - | - | - | - |
+| fileController.ts | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | ← | - | - | - | - | - |
+| bulkDownloadController.ts | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | ← | - | - | - | - | - |
+| demographicController.ts | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | ← | ← | - | - | - | ← | - | - | - | - |
+| readOnlyController.ts | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | ← | ← | - | - | - | - | ← | - | - | - |
+| DemographicModel.ts | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |
+| models/index.ts | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | → | - | - | - | - | - | - | - | - | - |
+| patientRoutes.ts | - | - | - | - | - | - | - | - | - | - | - | ← | - | - | - | - | - | - | - | - | - | - | - | - | - |
+| fileRoutes.ts | - | - | - | - | - | - | - | - | - | - | - | ← | ← | ← | - | - | - | - | - | - | - | - | - | - | - |
+| demographicRoutes.ts | - | - | - | - | - | - | - | - | - | - | - | - | - | - | ← | - | - | - | - | - | - | - | - | - | - |
+| readOnlyRoutes.ts | - | - | - | - | - | - | - | - | - | - | - | - | - | - | ← | - | - | - | - | - | - | - | - | - | - |
+| modelLoader.ts | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | ← | - | - | - | - | - | - | - | - | - |
+| .env.local | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |
+| .env | - | - | - | - | - | - | - | - | - | ← | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |
+
 ## Getting Started
 
 ### Prerequisites
