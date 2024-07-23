@@ -1,15 +1,49 @@
 import React, { useState } from 'react';
-import { IconMail, IconArrowRight } from '@tabler/icons-react';
 import { useMsal } from '@azure/msal-react';
+import { AuthenticationResult, IPublicClientApplication } from '@azure/msal-browser';
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Typography, 
+  Paper, 
+  Container,
+  Avatar,
+  CssBaseline,
+  Fade
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import EmailIcon from '@mui/icons-material/Email';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { getLoginRequest } from '../services/authService';
-import { AuthenticationResult } from '@azure/msal-browser';
 
-const LoginPage: React.FC = () => {
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginTop: theme.spacing(8),
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  padding: theme.spacing(4),
+  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  backdropFilter: 'blur(10px)',
+  borderRadius: theme.shape.borderRadius * 2,
+}));
+
+const Logo = styled('img')({
+  width: '120px',
+  height: '120px',
+  marginBottom: '1rem',
+});
+
+interface LoginPageProps {
+  msalInstance: IPublicClientApplication;
+}
+
+const LoginPage: React.FC<LoginPageProps> = ({ msalInstance }) => {
   const { instance } = useMsal();
   const [email, setEmail] = useState('');
 
   const handleLogin = () => {
-    // Create a login request with the current email
     const currentLoginRequest = getLoginRequest(email);
 
     instance.loginPopup(currentLoginRequest).then((response: AuthenticationResult) => {
@@ -21,48 +55,52 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-md">
-      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-        <div className="p-6">
-          <div className="flex items-center justify-center mb-6">
-            <img src="minerva_1024.png" alt="MINERVA Logo" className="w-32 h-32 ml-0" />
-          </div>
-          <h2 className="text-2xl text-center text-gray-600 mb-2">MInERVA</h2>
-          <p className="text-gray-600 text-center mb-4 font-light">
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <Fade in={true} timeout={1000}>
+        <StyledPaper elevation={6}>
+          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Logo src="minerva_1024.png" alt="MINERVA Logo" />
+          <Typography component="h1" variant="h4" gutterBottom>
+            MInERVA
+          </Typography>
+          <Typography variant="subtitle1" align="center" color="textSecondary" paragraph>
             Secure access to patient records
-          </p>
-          <p className="text-sm text-gray-400 text-center mb-8 font-light">
+          </Typography>
+          <Typography variant="body2" align="center" color="textSecondary" paragraph>
             Medical Information and Electronic Record Vault Application
-          </p>
-          <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
-            <div className="space-y-6">
-              <div>
-                <div className="relative">
-                  <input 
-                    type="email" 
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="text-center w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#00b7be] focus:border-transparent transition duration-200"
-                    placeholder="Enter your email"
-                  />
-                  <IconMail className="absolute right-3 top-3.5 h-5 w-5 text-gray-400" />
-                </div>
-              </div>
-            </div>
-            <div className="mt-8">
-              <button 
-                type="submit"
-                className="w-full bg-[#00b7be] text-white rounded-lg px-4 py-3 font-medium hover:bg-[#00a0a6] focus:outline-none focus:ring-2 focus:ring-[#00b7be] focus:ring-offset-2 transition duration-200 flex items-center justify-center"
-              >
-                Sign in with Entra ID
-                <IconArrowRight className="ml-2 h-5 w-5" />
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          </Typography>
+          <Box component="form" onSubmit={(e) => { e.preventDefault(); handleLogin(); }} noValidate sx={{ mt: 1, width: '100%' }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              InputProps={{
+                startAdornment: <EmailIcon color="action" />,
+              }}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              endIcon={<ArrowForwardIcon />}
+            >
+              Sign in with Entra ID
+            </Button>
+          </Box>
+        </StyledPaper>
+      </Fade>
+    </Container>
   );
 };
 

@@ -1,60 +1,67 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from '@azure/msal-react';
-import { InteractionStatus } from '@azure/msal-browser';
-import axios from 'axios';
-import './App.css';
-import LoginPage from './components/LoginPage';
-import SearchPatients from './components/SearchPatients';
+import { Box, CssBaseline, Toolbar } from '@mui/material';
 import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import Dashboard from './pages/Dashboard';
+import SearchPatients from './components/SearchPatients';
+import Settings from './pages/Settings';
+import LoginPage from './components/LoginPage';
 
-const App: React.FC = () => {
-  const { instance, inProgress } = useMsal();
+const drawerWidth = 240;
 
-  const getAccessToken = useCallback(async () => {
-    if (inProgress !== InteractionStatus.None) {
-      return null;
-    }
-
-    try {
-      const account = instance.getAllAccounts()[0];
-      if (account) {
-        const response = await instance.acquireTokenSilent({
-          scopes: ['User.Read'],
-          account: account
-        });
-        return response.accessToken;
-      }
-    } catch (error) {
-      console.error('Error acquiring token:', error);
-    }
-    return null;
-  }, [instance, inProgress]);
-
-  useEffect(() => {
-    const configureAxios = async () => {
-      const token = await getAccessToken();
-      if (token) {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      }
-    };
-
-    configureAxios();
-  }, [getAccessToken]);
+const AuthenticatedContent: React.FC = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
-    <div className="flex flex-col h-screen">
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <Header />
+      <Box sx={{ display: 'flex', flexGrow: 1 }}>
+        <Sidebar isOpen={isSidebarOpen} toggle={toggleSidebar} />
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 3,
+            width: { sm: `calc(100% - ${isSidebarOpen ? drawerWidth : 64}px)` },
+            ml: { sm: `${isSidebarOpen ? drawerWidth : 64}px` },
+            transition: theme =>
+              theme.transitions.create(['margin', 'width'], {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.leavingScreen,
+              }),
+          }}
+        >
+          <Toolbar /> {/* This toolbar is for spacing, pushing content below the AppBar */}
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/search" element={<SearchPatients />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+const App: React.FC = () => {
+  const { instance } = useMsal();
+
+  return (
+    <Router>
+      <CssBaseline />
       <AuthenticatedTemplate>
-        <Header />
-        <main className="flex-grow overflow-hidden">
-          <SearchPatients />
-        </main>
+        <AuthenticatedContent />
       </AuthenticatedTemplate>
       <UnauthenticatedTemplate>
-        <div className="flex items-center justify-center h-full">
-          <LoginPage />
-        </div>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <LoginPage msalInstance={instance} />
+        </Box>
       </UnauthenticatedTemplate>
-    </div>
+    </Router>
   );
 };
 
