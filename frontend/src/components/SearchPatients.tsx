@@ -1,47 +1,52 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import {
-  TextField, IconButton, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  Typography, Box, Tabs, Tab, Checkbox, CircularProgress, Alert, Pagination, Accordion, AccordionSummary, AccordionDetails
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Paper, 
+  Typography, 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow,
+  Tabs,
+  Tab,
+  CircularProgress,
+  Grid,
+  IconButton,
+  Checkbox,
+  Pagination
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import SearchIcon from '@mui/icons-material/Search';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import ImageIcon from '@mui/icons-material/Image';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import { 
+  Search as SearchIcon, 
+  Download as DownloadIcon,
+  ExpandMore as ExpandMoreIcon,
+  ChevronRight as ChevronRightIcon
+} from '@mui/icons-material';
 import debounce from 'lodash/debounce';
 import { searchPatients, getPatientDetails, getPatientFileReferences, downloadFile } from '../utils/api';
 import { Patient, PatientFile } from '../types';
 import axios from 'axios';
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
-  '& .MuiOutlinedInput-root': {
-    '&.Mui-focused fieldset': {
-      borderColor: theme.palette.primary.main,
-    },
-  },
-}));
-
 const SearchPatients: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Patient[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
-  const [patientData, setPatientData] = useState<Record<string, unknown>>({}); // Changed from any
+  const [patientData, setPatientData] = useState<any>(null);
   const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [hasSearched, setHasSearched] = useState(false);
   const [patientFiles, setPatientFiles] = useState<PatientFile[]>([]);
+  const [expandedTypes, setExpandedTypes] = useState<Set<string>>(new Set());
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [isDownloading, setIsDownloading] = useState(false);
   const [selectedFilesByType, setSelectedFilesByType] = useState<Record<string, Set<string>>>({});
   const [isSelectAllCheckedByType, setIsSelectAllCheckedByType] = useState<Record<string, boolean>>({});
   const resultsPerPage = 20;
-
-  const indexOfLastResult = currentPage * resultsPerPage;
-  const indexOfFirstResult = indexOfLastResult - resultsPerPage;
-  const currentResults = searchResults.slice(indexOfFirstResult, indexOfLastResult);
-  const totalPages = Math.ceil(searchResults.length / resultsPerPage);
 
   const performSearch = useCallback(async (query: string) => {
     if (query.length < 3) {
@@ -55,8 +60,9 @@ const SearchPatients: React.FC = () => {
     try {
       const results = await searchPatients(query);
       setSearchResults(results);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error fetching patient data');
+      setHasSearched(true);
+    } catch (err: any) {
+      setError(err.message || 'Error fetching patient data');
       setSearchResults([]);
     } finally {
       setLoading(false);
@@ -79,7 +85,7 @@ const SearchPatients: React.FC = () => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
     setSelectedPatient(null);
-    setPatientData({});
+    setPatientData(null);
   };
 
   const fetchPatientDetails = useCallback(async (athenapatientid: string) => {
@@ -90,8 +96,8 @@ const SearchPatients: React.FC = () => {
       const data = await getPatientDetails(athenapatientid);
       setPatientData(data);
       setSelectedCollection(Object.keys(data)[0]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error fetching patient details');
+    } catch (err: any) {
+      setError(err.message || 'Error fetching patient details');
     } finally {
       setLoading(false);
     }
@@ -104,9 +110,9 @@ const SearchPatients: React.FC = () => {
     try {
       const files = await getPatientFileReferences(athenapatientid);
       setPatientFiles(files);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching patient files:', err);
-      setError(err instanceof Error ? err.message : 'Error fetching patient files');
+      setError(err.message || 'Error fetching patient files');
     } finally {
       setLoading(false);
     }
@@ -209,36 +215,34 @@ const SearchPatients: React.FC = () => {
       return null;
     }
 
-    const data = patientData[selectedCollection] as Record<string, unknown>[];
-    return (
-      <TableContainer component={Paper}>
+    const data = patientData[selectedCollection];
+    return data.map((item: any, index: number) => (
+      <TableContainer key={index} component={Paper} sx={{ mb: 2 }}>
         <Table>
           <TableHead>
             <TableRow>
-              {Object.keys(data[0]).map((key) => (
+              {Object.keys(item).map((key) => (
                 <TableCell key={key}>{key}</TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.map((item, index) => (
-              <TableRow key={index}>
-                {Object.values(item).map((value, i) => (
-                  <TableCell key={i}>{JSON.stringify(value, null, 2)}</TableCell>
-                ))}
-              </TableRow>
-            ))}
+            <TableRow>
+              {Object.values(item).map((value, i) => (
+                <TableCell key={i}>{JSON.stringify(value, null, 2)}</TableCell>
+              ))}
+            </TableRow>
           </TableBody>
         </Table>
       </TableContainer>
-    );
+    ));
   };
 
   const renderFiles = () => {
     if (patientFiles.length === 0) {
       return <Typography>No files found for this patient.</Typography>;
     }
-  
+
     const groupedFiles = patientFiles.reduce((acc, file) => {
       const fileType = file.filetype.toUpperCase();
       if (!acc[fileType]) {
@@ -250,19 +254,23 @@ const SearchPatients: React.FC = () => {
 
     return (
       <Box>
-      {Object.entries(groupedFiles).map(([fileType, files]) => (
-        <Accordion key={fileType}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Box display="flex" alignItems="center">
-              {fileType === 'PDF' ? <PictureAsPdfIcon color="error" /> : 
-               fileType === 'PNG' || fileType === 'JPG' || fileType === 'JPEG' ? <ImageIcon color="primary" /> :
-               <InsertDriveFileIcon color="action" />}
-              <Typography variant="subtitle1" ml={1}>
-                {fileType} Files ({files.length})
-              </Typography>
+        {Object.entries(groupedFiles).map(([fileType, files]) => (
+          <Paper key={fileType} sx={{ mb: 2, overflow: 'hidden' }}>
+            <Box sx={{ p: 2, bgcolor: 'grey.100', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="h6">{fileType} Files ({files.length})</Typography>
+              <IconButton onClick={() => setExpandedTypes(prev => {
+                const newSet = new Set(prev);
+                if (newSet.has(fileType)) {
+                  newSet.delete(fileType);
+                } else {
+                  newSet.add(fileType);
+                }
+                return newSet;
+              })}>
+                {expandedTypes.has(fileType) ? <ExpandMoreIcon /> : <ChevronRightIcon />}
+              </IconButton>
             </Box>
-          </AccordionSummary>
-            <AccordionDetails>
+            {expandedTypes.has(fileType) && (
               <TableContainer>
                 <Table>
                   <TableHead>
@@ -294,9 +302,8 @@ const SearchPatients: React.FC = () => {
                           <TableCell>
                             <Button
                               variant="contained"
-                              color="primary"
+                              size="small"
                               onClick={() => handleFileDownload(file.filePath)}
-                              startIcon={<FileDownloadIcon />}
                             >
                               Download
                             </Button>
@@ -307,30 +314,10 @@ const SearchPatients: React.FC = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
-            </AccordionDetails>
-          </Accordion>
+            )}
+          </Paper>
         ))}
       </Box>
-    );
-  };
-
-  const renderTabs = () => {
-    if (!patientData) return null;
-    return (
-      <Tabs
-        value={selectedCollection}
-        onChange={(_, newValue) => setSelectedCollection(newValue)}
-        indicatorColor="primary"
-        textColor="primary"
-        variant="scrollable"
-        scrollButtons="auto"
-      >
-        {Object.keys(patientData).map((collection) => (
-          <Tab key={collection} label={collection} value={collection} />
-        ))}
-        <Tab label="Files" value="files" />
-        <Tab label="Files Summary" value="filesSummary" />
-      </Tabs>
     );
   };
 
@@ -341,8 +328,8 @@ const SearchPatients: React.FC = () => {
     }, {} as Record<string, number>);
 
     return (
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>Files Summary</Typography>
+      <Paper sx={{ p: 2 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>Files Summary</Typography>
         <TableContainer>
           <Table>
             <TableHead>
@@ -361,107 +348,125 @@ const SearchPatients: React.FC = () => {
             </TableBody>
           </Table>
         </TableContainer>
-        <Typography variant="body2" mt={2}>Total files: {patientFiles.length}</Typography>
+        <Typography sx={{ mt: 2 }}>Total files: {patientFiles.length}</Typography>
       </Paper>
     );
   };
 
+  const indexOfLastResult = currentPage * resultsPerPage;
+  const indexOfFirstResult = indexOfLastResult - resultsPerPage;
+  const currentResults = searchResults.slice(indexOfFirstResult, indexOfLastResult);
+  const totalPages = Math.ceil(searchResults.length / resultsPerPage);
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Paper
-        elevation={3}
-        sx={{
-          p: 2,
-          transition: 'all 0.3s',
-          mb: 2,
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <StyledTextField
-            fullWidth
-            value={searchTerm}
-            onChange={handleInputChange}
-            placeholder="Search patients by first name, last name, or Athena ID..."
-            variant="outlined"
-            InputProps={{
-              startAdornment: <SearchIcon color="action" />,
-            }}
-          />
-          <IconButton color="primary" sx={{ ml: 1 }}>
-            <SearchIcon />
-          </IconButton>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
+        <Box sx={{ maxWidth: 'md', mx: 'auto' }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs>
+              <TextField
+                fullWidth
+                value={searchTerm}
+                onChange={handleInputChange}
+                placeholder="Search patients by first name, last name, or Athena ID..."
+                InputProps={{
+                  startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />,
+                }}
+              />
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<SearchIcon />}
+                onClick={() => performSearch(searchTerm)}
+              >
+                Search
+              </Button>
+            </Grid>
+          </Grid>
         </Box>
       </Paper>
 
       <Box sx={{ flexGrow: 1, overflow: 'auto', px: 2 }}>
-        {loading && <CircularProgress />}
-        {error && <Alert severity="error">{error}</Alert>}
+        <Box sx={{ maxWidth: 'md', mx: 'auto' }}>
+          {loading && <CircularProgress sx={{ display: 'block', mx: 'auto' }} />}
+          {error && <Typography color="error" align="center">{error}</Typography>}
 
-        {!selectedPatient && searchResults.length > 0 && (
-          <Paper elevation={3} sx={{ p: 2 }}>
-            <TableContainer>
+          {!selectedPatient && searchResults.length > 0 && (
+            <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
+              <Typography variant="h5" sx={{ mb: 2 }}>Search Results</Typography>
+              <TableContainer>
               <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>First Name</TableCell>
-                    <TableCell>Last Name</TableCell>
-                    <TableCell>DOB</TableCell>
-                    <TableCell>Age</TableCell>
-                    <TableCell>Gender</TableCell>
-                    <TableCell>Athena ID</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {currentResults.map((patient: Patient, index: number) => (
-                    <TableRow
-                      key={index}
-                      onClick={() => handlePatientClick(patient.patientdetails.athenapatientid)}
-                      hover
-                      sx={{ cursor: 'pointer' }}
-                    >
-                      <TableCell>{patient.patientdetails.firstname}</TableCell>
-                      <TableCell>{patient.patientdetails.lastname}</TableCell>
-                      <TableCell>{patient.patientdetails.dob}</TableCell>
-                      <TableCell>{patient.patientdetails.age}</TableCell>
-                      <TableCell>{patient.patientdetails.gender}</TableCell>
-                      <TableCell>{patient.patientdetails.athenapatientid}</TableCell>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>First Name</TableCell>
+                      <TableCell>Last Name</TableCell>
+                      <TableCell>DOB</TableCell>
+                      <TableCell>Age</TableCell>
+                      <TableCell>Gender</TableCell>
+                      <TableCell>Athena ID</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-
-            {totalPages > 1 && (
+                  </TableHead>
+                  <TableBody>
+                    {currentResults.map((patient: Patient, index: number) => (
+                      <TableRow 
+                        key={index} 
+                        onClick={() => handlePatientClick(patient.patientdetails.athenapatientid)}
+                        sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'action.hover' } }}
+                      >
+                        <TableCell>{patient.patientdetails.firstname}</TableCell>
+                        <TableCell>{patient.patientdetails.lastname}</TableCell>
+                        <TableCell>{patient.patientdetails.dob}</TableCell>
+                        <TableCell>{patient.patientdetails.age}</TableCell>
+                        <TableCell>{patient.patientdetails.gender}</TableCell>
+                        <TableCell>{patient.patientdetails.athenapatientid}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
               <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                <Pagination
-                  count={totalPages}
-                  page={currentPage}
-                  onChange={(_, page) => setCurrentPage(page)}
-                  color="primary"
+                <Pagination 
+                  count={totalPages} 
+                  page={currentPage} 
+                  onChange={(event, value) => setCurrentPage(value)}
                 />
               </Box>
-            )}
-          </Paper>
-        )}
+            </Paper>
+          )}
 
-        {selectedPatient && patientData && (
-          <Paper elevation={3} sx={{ p: 2 }}>
-            <Typography variant="h5" gutterBottom>Patient Details</Typography>
-            {renderTabs()}
-            <Box sx={{ my: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<FileDownloadIcon />}
-                onClick={downloadSelected}
-                disabled={isDownloading || Object.values(selectedFilesByType).every(set => set.size === 0)}
+          {selectedPatient && patientData && (
+            <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
+              <Typography variant="h4" sx={{ mb: 2 }}>Patient Details</Typography>
+              <Tabs 
+                value={selectedCollection} 
+                onChange={(e, newValue) => setSelectedCollection(newValue)}
+                sx={{ mb: 2 }}
               >
-                {isDownloading ? 'Downloading...' : `Download Selected (${Object.values(selectedFilesByType).reduce((sum, set) => sum + set.size, 0)})`}
-              </Button>
-            </Box>
-            {renderData()}
-          </Paper>
-        )}
+                {Object.keys(patientData).map((collection) => (
+                  <Tab key={collection} label={collection} value={collection} />
+                ))}
+                <Tab label="Files" value="files" />
+                <Tab label="Files Summary" value="filesSummary" />
+              </Tabs>
+              <Box sx={{ mb: 2 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<DownloadIcon />}
+                  onClick={downloadSelected}
+                  disabled={isDownloading || Object.values(selectedFilesByType).every(set => set.size === 0)}
+                >
+                  {isDownloading ? 'Downloading...' : `Download Selected (${Object.values(selectedFilesByType).reduce((sum, set) => sum + set.size, 0)})`}
+                </Button>
+              </Box>
+              <Box sx={{ overflow: 'auto' }}>
+                {renderData()}
+              </Box>
+            </Paper>
+          )}
+        </Box>
       </Box>
     </Box>
   );
