@@ -30,6 +30,7 @@ export const getAllPatientData = async (req: Request, res: Response) => {
 export const searchPatients = async (req: Request, res: Response) => {
   try {
     const { query } = req.query;
+    const { limit } = req.query; // Add this line to get the limit from the request query
     const db = mongoose.connection.db;
     const collection = db.collection('demographic');
 
@@ -39,7 +40,7 @@ export const searchPatients = async (req: Request, res: Response) => {
         { "patientdetails.lastname": new RegExp(query as string, 'i') },
         { "patientdetails.athenapatientid": query }
       ]
-    }).limit(10).toArray();
+    }).limit(Number(limit)).toArray(); // Use the limit variable to set the limit
 
     if (patients.length === 0) {
       return res.status(404).json({ message: 'No patients found' });

@@ -86,9 +86,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
     <Box sx={{ display: 'flex' }}>
       <StyledDrawer variant="permanent" open={isOpen} theme={theme}>
         <DrawerHeader>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, ml: 2 }}>
-            {isOpen ? 'MyApp' : 'MA'}
-          </Typography>
           <IconButton onClick={toggle}>
             {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>
@@ -96,28 +93,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
         <Divider />
         <List>
           {navItems.map((item) => (
-            <ListItem key={item.path} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                component={Link}
-                to={item.path}
-                sx={{
-                  minHeight: 48,
-                  justifyContent: isOpen ? 'initial' : 'center',
-                  px: 2.5,
-                  backgroundColor: location.pathname === item.path ? theme.palette.action.selected : 'transparent',
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: isOpen ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText primary={item.label} sx={{ opacity: isOpen ? 1 : 0 }} />
-              </ListItemButton>
+            <ListItem button key={item.path} component={Link} to={item.path} selected={location.pathname === item.path}>
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.label} />
             </ListItem>
           ))}
         </List>

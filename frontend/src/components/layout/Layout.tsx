@@ -17,8 +17,8 @@ const Layout: React.FC = () => {
         <Sidebar isOpen={isSidebarOpen} toggle={toggleSidebar} />
         <motion.main
           className="flex-grow p-4 overflow-auto"
-          initial={{ paddingLeft: isSidebarOpen ? '16rem' : '4rem' }}
-          animate={{ paddingLeft: isSidebarOpen ? '16rem' : '4rem' }}
+          initial={{ paddingLeft: '4rem' }} // Updated padding value
+          animate={{ paddingLeft: '4rem', paddingRight: '4rem' }} // Updated padding value
           transition={{ duration: 0.3 }}
         >
           <Outlet />

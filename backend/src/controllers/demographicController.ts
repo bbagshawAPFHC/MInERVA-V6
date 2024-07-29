@@ -10,7 +10,7 @@ export const getAllPatientData = async (req: Request, res: Response) => {
 
     for (const collection of collections) {
       const col = db.collection(collection.name);
-      const documents = await col.find({ "patientdetails.athenapatientid": patientId }).toArray();
+      const documents = await col.find({ "patientdetails.athenapatientid": patientId }).limit(100).toArray();
       if (documents.length > 0) {
         results[collection.name] = documents;
       }
