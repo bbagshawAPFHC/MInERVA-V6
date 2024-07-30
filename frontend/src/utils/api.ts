@@ -87,3 +87,33 @@ export const bulkDownload = async (patientId: string, fileIds: string[], limit?:
     throw new Error('Error bulk downloading files');
   }
 };
+
+export const getCollectionCount = async (): Promise<number> => {
+  try {
+    const response = await axios.get('/api/collections/count');
+    return response.data.count;
+  } catch (error) {
+    console.error('Error fetching collection count:', error);
+    throw new Error('Error fetching collection count');
+  }
+};
+
+export const getPatientCount = async (): Promise<number> => {
+  try {
+    const response = await axios.get('/api/patients/count');
+    return response.data.count;
+  } catch (error) {
+    console.error('Error fetching patient count:', error);
+    throw new Error('Error fetching patient count');
+  }
+};
+
+export const getFileCounts = async (): Promise<{ [fileType: string]: number }> => {
+  try {
+    const response = await axios.get('/api/files/count');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching file counts:', error);
+    throw new Error('Error fetching file counts');
+  }
+};
