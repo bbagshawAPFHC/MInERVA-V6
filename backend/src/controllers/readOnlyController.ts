@@ -5,6 +5,11 @@ export const getAllPatientData = async (req: Request, res: Response) => {
   try {
     const patientId = req.params.id;
     const db = mongoose.connection.db;
+
+    if (!db) {
+      throw new Error('Database connection is not established');
+    }
+
     const collections = await db.listCollections().toArray();
     const results: { [key: string]: any } = {};
 
@@ -32,6 +37,11 @@ export const searchPatients = async (req: Request, res: Response) => {
     const { query } = req.query;
     const { limit } = req.query; // Add this line to get the limit from the request query
     const db = mongoose.connection.db;
+
+    if (!db) {
+      throw new Error('Database connection is not established');
+    }
+
     const collection = db.collection('demographic');
 
     const patients = await collection.find({
